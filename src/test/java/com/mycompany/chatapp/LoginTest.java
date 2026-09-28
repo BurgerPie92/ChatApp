@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for the registration and login feature in ChatApp.java. */
 class LoginTest {
     private Login validLogin() {
-        return new Login("Alice", "Smith", "a_s", "Tr!ple8Key", "+27821234567");
+        return new Login("David", "Williams", "d_w", "N3w!Pass9", "+27111222333");
     }
 
     @Test
@@ -18,7 +18,7 @@ class LoginTest {
 
     @Test
     void usernameIsIncorrectlyFormatted() {
-        Login login = new Login("Alice", "Smith", "kyle!!!!!", "Tr!ple8Key", "+27821234567");
+        Login login = new Login("David", "Williams", "kyle!!!!!", "N3w!Pass9", "+27111222333");
         assertFalse(login.checkUserName());
         assertTrue(login.registerUser().startsWith("Username is not correctly formatted"));
     }
@@ -30,7 +30,7 @@ class LoginTest {
 
     @Test
     void passwordDoesNotMeetComplexityRequirements() {
-        Login login = new Login("Alice", "Smith", "a_s", "password", "+27821234567");
+        Login login = new Login("David", "Williams", "d_w", "password", "+27111222333");
         assertFalse(login.checkPasswordComplexity());
         assertTrue(login.registerUser().startsWith("Password is not correctly formatted"));
     }
@@ -42,7 +42,7 @@ class LoginTest {
 
     @Test
     void cellPhoneNumberIsIncorrectlyFormatted() {
-        Login login = new Login("Alice", "Smith", "a_s", "Tr!ple8Key", "0112345678");
+        Login login = new Login("David", "Williams", "d_w", "N3w!Pass9", "0112345678");
         assertFalse(login.checkCellPhoneNumber());
         assertEquals(
                 "Cell phone number incorrectly formatted or does not contain international code.",
@@ -53,9 +53,9 @@ class LoginTest {
     void loginIsSuccessfulWithCorrectDetails() {
         Login login = validLogin();
         assertEquals("User registered successfully.", login.registerUser());
-        assertTrue(login.loginUser("a_s", "Tr!ple8Key"));
-        assertEquals("Welcome Alice, Smith, it is great to see you again.",
-                login.returnLoginStatus("a_s", "Tr!ple8Key"));
+        assertTrue(login.loginUser("d_w", "N3w!Pass9"));
+        assertEquals("Welcome David, Williams, it is great to see you again.",
+                login.returnLoginStatus("d_w", "N3w!Pass9"));
     }
 
     @Test
@@ -67,3 +67,4 @@ class LoginTest {
                 login.returnLoginStatus("a_s", "wrong"));
     }
 }
+
