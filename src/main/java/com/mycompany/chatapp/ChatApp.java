@@ -72,33 +72,33 @@ public class ChatApp {
 
     /** Runs the same checks previously stored in LoginTest.java. */
     private static void runUnitTests() {
-        Login validLogin = new Login("Alice", "Smith", "a_s", "Tr!ple8Key", "+27821234567");
+        Login validLogin = new Login("David", "Williams", "d_w", "N3w!Pass9", "+27111222333");
 
         // Username tests.
         check(validLogin.checkUserName(), "Valid username should pass");
-        check(!new Login("Alice", "Smith", "kyle!!!!!", "Tr!ple8Key", "+27821234567").checkUserName(),
+        check(!new Login("David", "Williams", "kyle!!!!!", "N3w!Pass9", "+27111222333").checkUserName(),
                 "Invalid username should fail");
 
         // Password tests.
         check(validLogin.checkPasswordComplexity(), "Valid password should pass");
-        check(!new Login("Alice", "Smith", "a_s", "password", "+27821234567").checkPasswordComplexity(),
+        check(!new Login("David", "Williams", "d_w", "password", "+27111222333").checkPasswordComplexity(),
                 "Invalid password should fail");
 
         // Cell phone tests.
         check(validLogin.checkCellPhoneNumber(), "Valid phone number should pass");
-        check(!new Login("Alice", "Smith", "a_s", "Tr!ple8Key", "0112345678").checkCellPhoneNumber(),
+        check(!new Login("David", "Williams", "d_w", "N3w!Pass9", "0112345678").checkCellPhoneNumber(),
                 "Invalid phone number should fail");
 
         // Registration and successful login tests.
         check("User registered successfully.".equals(validLogin.registerUser()),
                 "Valid registration should succeed");
-        check(validLogin.loginUser("a_s", "Tr!ple8Key"), "Valid login should succeed");
-        check("Welcome Alice, Smith, it is great to see you again."
-                        .equals(validLogin.returnLoginStatus("a_s", "Tr!ple8Key")),
+        check(validLogin.loginUser("d_w", "N3w!Pass9"), "Valid login should succeed");
+        check("Welcome David, Williams, it is great to see you again."
+                        .equals(validLogin.returnLoginStatus("d_w", "N3w!Pass9")),
                 "Successful login message should be returned");
 
         // Failed registration and failed login tests.
-        Login invalidUsername = new Login("Alice", "Smith", "kyle!!!!!", "Tr!ple8Key", "+27821234567");
+        Login invalidUsername = new Login("David", "Williams", "kyle!!!!!", "N3w!Pass9", "+27111222333");
         check(invalidUsername.registerUser().startsWith("Username is not correctly formatted"),
                 "Invalid registration should fail");
         check(!validLogin.loginUser("a_s", "wrong"), "Incorrect password should fail");
@@ -217,3 +217,4 @@ class Login {
         return value;
     }
 }
+
