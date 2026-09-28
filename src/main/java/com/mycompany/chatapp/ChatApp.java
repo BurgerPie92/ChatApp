@@ -118,6 +118,11 @@ public class ChatApp {
  */
 class Login {
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^(?=.{1,5}$)[A-Za-z0-9]*_[A-Za-z0-9]*$");
+    // Reference list for the South African cell phone regular expression:
+    // 1. Oracle, Java Regular Expressions: https://docs.oracle.com/javase/tutorial/essential/regex/
+    // 2. Oracle, java.util.regex.Pattern API: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/regex/Pattern.html
+    // 3. ICASA, Numbering Plan Regulations: https://www.icasa.org.za/legislation-and-regulations/numbering-plan-regulations
+    // The pattern checks the international code (+27) followed by nine digits.
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+27\\d{9}$");
 
     private final String firstName;
@@ -217,4 +222,5 @@ class Login {
         return value;
     }
 }
+
 
