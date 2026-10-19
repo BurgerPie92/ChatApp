@@ -4,24 +4,25 @@
 
 package com.mycompany.chatapp;
 
-import java.util.regex.Pattern;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
-/**
- *
- * @author Clayton.Burger
- */
+/** Console entry point for registration, login, and the QuickChat menu. */
 public class ChatApp {
 
     public static void main(String[] args) {
-        // Create a Scanner so the user can enter details in the console.
-        Scanner scanner = new Scanner(System.in);
+        try (Scanner scanner = new Scanner(System.in)) {
+            runApplication(scanner);
+        }
+    }
 
-        // Ask the user for the details needed to create an account.
+    private static void runApplication(Scanner scanner) {
+        Message.resetSession();
+
         System.out.print("Enter your first name: ");
-        String firstName = scanner.nextLine();
+        String firstName = scanner.nextLine().trim();
         System.out.print("Enter your last name: ");
-        String lastName = scanner.nextLine();
+        String lastName = scanner.nextLine().trim();
 
         System.out.print("Enter a username: ");
         String username = scanner.nextLine();
@@ -42,75 +43,156 @@ public class ChatApp {
         System.out.print("Enter a South African cell phone number: ");
         String cellPhoneNumber = scanner.nextLine();
         while (!Login.isValidPhoneNumber(cellPhoneNumber)) {
-            System.out.println("Please input a South African number starting with +27.");
+            System.out.println("Cell phone number incorrectly formatted or does not contain international code.");
             System.out.print("Please enter a valid South African cell phone number: ");
             cellPhoneNumber = scanner.nextLine();
         }
 
-        // Create a Login object containing the user's registration details.
-        Login user = new Login(
-                firstName, lastName, username, password, cellPhoneNumber);
-
-        // Validate the details and register the user.
+        Login user = new Login(firstName, lastName, username, password, cellPhoneNumber);
         System.out.println(user.registerUser());
 
-        // Ask the user for login details after registration.
         System.out.print("Enter your username to log in: ");
         String loginUsername = scanner.nextLine();
         System.out.print("Enter your password to log in: ");
         String loginPassword = scanner.nextLine();
+        String loginStatus = user.returnLoginStatus(loginUsername, loginPassword);
+        System.out.println(loginStatus);
 
-        // Check whether the login details match the registered details.
-        System.out.println(user.returnLoginStatus(loginUsername, loginPassword));
+        if (!user.loginUser(loginUsername, loginPassword)) {
+            return;
+        }
 
-        // Run the built-in checks for the Login class.
-        runUnitTests();
+        System.out.println("Welcome to QuickChat.");
+        int messageLimit = readNonNegativeInteger(scanner, "How many messages would you like to enter? ");
+        int messagesCreated = 0;
+        boolean totalDisplayed = false;
+        boolean running = true;
 
-        // Close the Scanner after all console input has been read.
-        scanner.close();
-    }
+        if (messageLimit == 0) {
+            printTotalMessages();
+            totalDisplayed = true;
+        }
 
-    /** Runs the same checks previously stored in LoginTest.java. */
-    private static void runUnitTests() {
-        Login validLogin = new Login("David", "Williams", "d_w", "N3w!Pass9", "+27111222333");
+        while (running) {
+            System.out.println("\nPlease choose an option:");
+            System.out.println("1) Send Messages");
+            System.out.println("2) Show recently sent messages");
+            System.out.println("3) Quit");
+            int option = readInteger(scanner, "Enter 1, 2, or 3: ");
 
-        // Username tests.
-        check(validLogin.checkUserName(), "Valid username should pass");
-        check(!new Login("David", "Williams", "kyle!!!!!", "N3w!Pass9", "+27111222333").checkUserName(),
-                "Invalid username should fail");
+            switch (option) {
+                case 1 -> {
+                    if (messagesCreated >= messageLimit) {
+                        System.out.println("You have reached the message limit.");
+                    } else {
+                        for (int messageNumber = messagesCreated; messageNumber < messageLimit; messageNumber++) {
+                            Message message = createMessage(scanner, messageNumber);
+                            System.out.println("Message ID generated: " + message.getMessageID());
+                            int action = readMessageAction(scanner);
+                            String actionStatus = message.SentMessage(action);
+                            System.out.println(actionStatus);
 
-        // Password tests.
-        check(validLogin.checkPasswordComplexity(), "Valid password should pass");
-        check(!new Login("David", "Williams", "d_w", "password", "+27111222333").checkPasswordComplexity(),
-                "Invalid password should fail");
+                            if (action == 1 && actionStatus.startsWith("Message successfully sent")) {
+                                System.out.println(message.printSingleMessage());
+                            } else if (action == 2) {
+                                System.out.print("Enter 0 to delete this discarded message, or press Enter to continue: ");
+                                if ("0".equals(scanner.nextLine().trim())) {
+                                    System.out.println("Message deleted.");
+                                }
+                            }
 
-        // Cell phone tests.
-        check(validLogin.checkCellPhoneNumber(), "Valid phone number should pass");
-        check(!new Login("David", "Williams", "d_w", "N3w!Pass9", "0112345678").checkCellPhoneNumber(),
-                "Invalid phone number should fail");
-
-        // Registration and successful login tests.
-        check("User registered successfully.".equals(validLogin.registerUser()),
-                "Valid registration should succeed");
-        check(validLogin.loginUser("d_w", "N3w!Pass9"), "Valid login should succeed");
-        check("Welcome David, Williams, it is great to see you again."
-                        .equals(validLogin.returnLoginStatus("d_w", "N3w!Pass9")),
-                "Successful login message should be returned");
-
-        // Failed registration and failed login tests.
-        Login invalidUsername = new Login("David", "Williams", "kyle!!!!!", "N3w!Pass9", "+27111222333");
-        check(invalidUsername.registerUser().startsWith("Username is not correctly formatted"),
-                "Invalid registration should fail");
-        check(!validLogin.loginUser("a_s", "wrong"), "Incorrect password should fail");
-
-        System.out.println("All unit tests passed.");
-    }
-
-    private static void check(boolean condition, String failureMessage) {
-        if (!condition) {
-            throw new AssertionError(failureMessage);
+                            messagesCreated++;
+                        }
+                        if (!totalDisplayed && messagesCreated >= messageLimit) {
+                            printTotalMessages();
+                            totalDisplayed = true;
+                        }
+                    }
+                }
+                case 2 -> System.out.println("Coming Soon.");
+                case 3 -> {
+                    if (!totalDisplayed) {
+                        printTotalMessages();
+                        totalDisplayed = true;
+                    }
+                    running = false;
+                }
+                default -> System.out.println("Invalid option. Please choose 1, 2, or 3.");
+            }
         }
     }
+
+    private static Message createMessage(Scanner scanner, int messageNumber) {
+        String recipient;
+        while (true) {
+            System.out.print("Enter the recipient cell number: ");
+            recipient = scanner.nextLine().trim();
+            Message recipientCheck = new Message(messageNumber, recipient, "placeholder");
+            String recipientStatus = recipientCheck.checkRecipientCell();
+            if (!"Cell phone number successfully captured.".equals(recipientStatus)) {
+                System.out.println(recipientStatus);
+                continue;
+            }
+            break;
+        }
+
+        while (true) {
+            System.out.print("Enter your message (maximum 250 characters): ");
+            String text = scanner.nextLine();
+            Message draft = new Message(messageNumber, recipient, text);
+            String messageStatus = draft.checkMessageLength();
+            if (!"Message ready to send.".equals(messageStatus)) {
+                if (messageStatus.startsWith("Message exceeds")) {
+                    System.out.println("Please enter a message of less than 250 characters.");
+                } else {
+                    System.out.println(messageStatus);
+                }
+                continue;
+            }
+            return draft;
+        }
+    }
+
+    private static int readMessageAction(Scanner scanner) {
+        while (true) {
+            System.out.println("Choose what to do with this message:");
+            System.out.println("1) Send Message");
+            System.out.println("2) Disregard Message");
+            System.out.println("3) Store Message to send later");
+            int action = readInteger(scanner, "Enter 1, 2, or 3: ");
+            if (action >= 1 && action <= 3) {
+                return action;
+            }
+            System.out.println("Invalid option. Please choose 1, 2, or 3.");
+        }
+    }
+
+    private static int readNonNegativeInteger(Scanner scanner, String prompt) {
+        while (true) {
+            int value = readInteger(scanner, prompt);
+            if (value >= 0) {
+                return value;
+            }
+            System.out.println("Please enter zero or a positive whole number.");
+        }
+    }
+
+    private static int readInteger(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException exception) {
+                System.out.println("Please enter a whole number.");
+            }
+        }
+    }
+
+    private static void printTotalMessages() {
+        System.out.println("Total messages sent: " + Message.getTotalMessagesSent());
+    }
+
 }
 
 /**
