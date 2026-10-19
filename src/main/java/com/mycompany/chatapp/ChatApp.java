@@ -43,7 +43,7 @@ public class ChatApp {
         System.out.print("Enter a South African cell phone number: ");
         String cellPhoneNumber = scanner.nextLine();
         while (!Login.isValidPhoneNumber(cellPhoneNumber)) {
-            System.out.println("Cell phone number incorrectly formatted or does not contain international code.");
+            System.out.println("Please input a South African number starting with +27.");
             System.out.print("Please enter a valid South African cell phone number: ");
             cellPhoneNumber = scanner.nextLine();
         }

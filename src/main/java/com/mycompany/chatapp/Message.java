@@ -104,10 +104,17 @@ public class Message {
 
     /**
      * Applies the user's choice. Choices may be 1/2/3 or the corresponding words.
-     * JSON output follows the string-escaping rules in RFC 8259, section 7.
+     * JSON output follows RFC 8259 section 7 (Bray, 2017).
+     * Reference: Bray, T. (Ed.) (2017), The JavaScript Object Notation (JSON)
+     * Data Interchange Format, RFC 8259, IETF. https://www.rfc-editor.org/rfc/rfc8259
      */
     public String SentMessage(String choice) {
         return SentMessage(choice, DEFAULT_STORAGE_FILE);
+    }
+
+    /** Overload for the numeric choices shown in the console menu. */
+    public String SentMessage(int choice) {
+        return SentMessage(Integer.toString(choice));
     }
 
     /** Overload accepting a storage path to keep JSON-file tests isolated. */
